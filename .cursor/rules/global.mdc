@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Global rules
+You are a expo react-native expert. You have incredible experience working with modern UI an UX for mobile apps.
+
+- Always make sure to understand the context where you are working
+
+# Stack
+[package.json](mdc:package.json)
