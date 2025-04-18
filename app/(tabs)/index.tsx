@@ -1,8 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {
   View,
-  Text,
-  TextInput,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
@@ -14,6 +12,13 @@ import {useTheme} from "@/components/ThemeContext";
 import {colors} from "@/components/ThemeColors";
 import {fetchExchangeRates, ExchangeRate} from "@/services/exchangeRates";
 import {fetchExchangeRatesFromFirestore} from "@/services/exchangeRatesFirestore";
+import {
+  AppText,
+  AppTextInput,
+  AppTextBold,
+  AppTextSemiBold,
+  AppTextMedium,
+} from "@/components/FontProvider";
 
 export default function ExchangeCalculator() {
   const [amount, setAmount] = useState("");
@@ -87,8 +92,8 @@ export default function ExchangeCalculator() {
       marginBottom: 40,
     },
     inputPrompt: {
-      fontSize: 28,
-      fontWeight: "600",
+      fontSize: 24,
+      fontWeight: "700",
       color: themeColors.text,
       textAlign: "center",
       letterSpacing: 0.5,
@@ -99,16 +104,16 @@ export default function ExchangeCalculator() {
       marginBottom: 48,
     },
     input: {
-      fontSize: 56,
+      fontSize: 38,
       fontWeight: "bold",
-      color: themeColors.primary,
+      color: themeColors.text,
       borderBottomWidth: 3,
       borderBottomColor: themeColors.primary,
       paddingVertical: 10,
       textAlign: "center",
     },
     ratesTitle: {
-      fontSize: 22,
+      fontSize: 20,
       fontWeight: "700",
       color: themeColors.text,
       marginBottom: 24,
@@ -122,20 +127,32 @@ export default function ExchangeCalculator() {
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
-        height: 3,
+        height: 4,
       },
-      shadowOpacity: 0.1,
-      shadowRadius: 10,
-      elevation: 4,
+      shadowOpacity: 0.15,
+      shadowRadius: 12,
+      elevation: 6,
+      borderWidth: 1,
+      borderColor: "rgba(0,0,0,0.05)",
     },
     averageRate: {
       marginTop: 16,
       paddingTop: 24,
       borderTopWidth: 0,
-      backgroundColor: themeColors.primary + "15", // Semi-transparent primary
+      backgroundColor: themeColors.primary + "30",
+      borderLeftWidth: 4,
+      borderLeftColor: themeColors.primary,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 6,
+      },
+      shadowOpacity: 0.2,
+      shadowRadius: 15,
+      elevation: 8,
     },
     rateName: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: "700",
       color: themeColors.text,
       marginBottom: 12,
@@ -146,18 +163,20 @@ export default function ExchangeCalculator() {
       alignItems: "center",
     },
     rateText: {
-      fontSize: 16,
-      color: themeColors.textSecondary,
+      fontSize: 14,
+      color: themeColors.text,
+      opacity: 0.8,
     },
     convertedAmount: {
-      fontSize: 22,
+      fontSize: 18,
       fontWeight: "bold",
-      color: themeColors.success,
+      color: themeColors.textSecondary,
     },
     disclaimer: {
       marginTop: 24,
-      fontSize: 14,
-      color: themeColors.textSecondary,
+      fontSize: 12,
+      color: themeColors.text,
+      opacity: 0.7,
       textAlign: "center",
       fontStyle: "italic",
     },
@@ -178,13 +197,15 @@ export default function ExchangeCalculator() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.inputPrompt}>Calculadora de Tasas 💵</Text>
+            <AppTextSemiBold style={styles.inputPrompt}>
+              Calculadora de Tasas 💵
+            </AppTextSemiBold>
           </View>
 
           <View style={styles.inputContainer}>
             {/* Overlayed centered placeholder */}
             {amount === "" && (
-              <Text
+              <AppTextBold
                 style={[
                   styles.input,
                   {
@@ -196,14 +217,15 @@ export default function ExchangeCalculator() {
                     textAlign: "center",
                     textAlignVertical: "center",
                     color: themeColors.textSecondary,
+                    opacity: 0.6, // Increased contrast with lower opacity
                     zIndex: 0,
                   },
                 ]}
               >
                 0
-              </Text>
+              </AppTextBold>
             )}
-            <TextInput
+            <AppTextInput
               style={[styles.input, {zIndex: 1}]}
               keyboardType="decimal-pad"
               value={amount}
@@ -218,7 +240,7 @@ export default function ExchangeCalculator() {
                   sanitized = parts[0] + "." + parts.slice(1).join("");
                 }
                 // Limit to 7 characters
-                sanitized = sanitized.slice(0, 7);
+                sanitized = sanitized.slice(0, 9);
                 setAmount(sanitized);
               }}
               placeholder=""
@@ -227,47 +249,70 @@ export default function ExchangeCalculator() {
             />
           </View>
 
-          <Text style={styles.ratesTitle}>Tasas de Cambio 💱</Text>
+          <AppTextSemiBold style={styles.ratesTitle}>
+            Tasas de Cambio 💱
+          </AppTextSemiBold>
 
           {loading ? (
             <ActivityIndicator size="large" color={themeColors.primary} />
           ) : (
             <>
-              {exchangeRates.map((rate, index) => (
-                <View key={index} style={styles.rateCard}>
-                  <Text style={styles.rateName}>{rate.name}</Text>
-                  <View style={styles.rateValues}>
-                    <Text style={styles.rateText}>
-                      1$ = Bs. {formatNumber(rate.rate)}
-                    </Text>
-                    <Text style={styles.convertedAmount}>
-                      {amount
-                        ? `${formatNumber(parseFloat(amount) * rate.rate)} Bs.`
-                        : "0,00 Bs."}
-                    </Text>
+              {exchangeRates.map((rate, index) => {
+                // Determine card styling based on rate type
+                const getBorderColor = () => {
+                  if (rate.name.includes("BCV")) return "#3498db";
+                  if (rate.name.includes("Paralelo")) return "#2ecc71";
+                  return "rgba(0,0,0,0.05)";
+                };
+
+                return (
+                  <View
+                    key={index}
+                    style={[
+                      styles.rateCard,
+                      {borderLeftWidth: 4, borderLeftColor: getBorderColor()},
+                    ]}
+                  >
+                    <AppTextMedium style={styles.rateName}>
+                      {rate.name}
+                    </AppTextMedium>
+                    <View style={styles.rateValues}>
+                      <AppText style={styles.rateText}>
+                        1$ = Bs. {formatNumber(rate.rate)}
+                      </AppText>
+                      <AppTextBold style={styles.convertedAmount}>
+                        {amount
+                          ? `${formatNumber(
+                              parseFloat(amount) * rate.rate
+                            )} Bs.`
+                          : "0,00 Bs."}
+                      </AppTextBold>
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
 
               <View style={[styles.rateCard, styles.averageRate]}>
-                <Text style={styles.rateName}>{averageRate.name}</Text>
+                <AppTextMedium style={styles.rateName}>
+                  {averageRate.name}
+                </AppTextMedium>
                 <View style={styles.rateValues}>
-                  <Text style={styles.rateText}>
+                  <AppText style={styles.rateText}>
                     1$ = Bs. {formatNumber(averageRate.rate)}
-                  </Text>
-                  <Text style={styles.convertedAmount}>
+                  </AppText>
+                  <AppTextBold style={styles.convertedAmount}>
                     {amount
                       ? `${formatNumber(
                           parseFloat(amount) * averageRate.rate
                         )} Bs.`
                       : "0,00 Bs."}
-                  </Text>
+                  </AppTextBold>
                 </View>
               </View>
 
-              <Text style={styles.disclaimer}>
+              <AppText style={styles.disclaimer}>
                 * Las tasas son referenciales y pueden variar durante el día ⏰
-              </Text>
+              </AppText>
 
               <View style={styles.footerSpace} />
             </>

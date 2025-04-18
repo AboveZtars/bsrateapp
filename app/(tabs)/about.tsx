@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Linking,
@@ -10,6 +9,12 @@ import {
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useTheme} from "@/components/ThemeContext";
 import {colors} from "@/components/ThemeColors";
+import {
+  AppText,
+  AppTextBold,
+  AppTextSemiBold,
+  AppTextMedium,
+} from "@/components/FontProvider";
 
 export default function About() {
   const {theme} = useTheme();
@@ -98,54 +103,60 @@ export default function About() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Acerca de BSRate</Text>
-          <Text style={styles.subtitle}>
+          <AppTextBold style={styles.title}>Acerca de BSRate</AppTextBold>
+          <AppText style={styles.subtitle}>
             Una aplicación para consultar tasas de cambio de bolívar a dólar en
             Venezuela.
-          </Text>
+          </AppText>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>¿Cómo funciona?</Text>
+          <AppTextSemiBold style={styles.sectionTitle}>
+            ¿Cómo funciona?
+          </AppTextSemiBold>
           <View style={styles.card}>
-            <Text style={styles.cardText}>
+            <AppText style={styles.cardText}>
               BSRate recopila información de diferentes fuentes para brindarte
               las tasas de cambio más actualizadas. Puedes ingresar un monto en
               dólares y obtener su equivalente en bolívares según diferentes
               proveedores.
-            </Text>
+            </AppText>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fuentes</Text>
+          <AppTextSemiBold style={styles.sectionTitle}>Fuentes</AppTextSemiBold>
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Información actualizada</Text>
-            <Text style={styles.cardText}>
+            <AppTextMedium style={styles.cardTitle}>
+              Información actualizada
+            </AppTextMedium>
+            <AppText style={styles.cardText}>
               Las tasas mostradas son referenciales y pueden variar a lo largo
               del día. Los datos se actualizan periódicamente para ofrecerte la
               información más precisa.
-            </Text>
+            </AppText>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Contacto</Text>
+          <AppTextSemiBold style={styles.sectionTitle}>
+            Contacto
+          </AppTextSemiBold>
           <View style={styles.card}>
-            <Text style={styles.cardText}>
+            <AppText style={styles.cardText}>
               ¿Tienes preguntas, comentarios o sugerencias? Ponte en contacto
               con nosotros:
-            </Text>
+            </AppText>
             <TouchableOpacity
               onPress={() => Linking.openURL("mailto:contact@bsrate.app")}
             >
-              <Text style={styles.link}>contact@bsrate.app</Text>
+              <AppText style={styles.link}>contact@bsrate.app</AppText>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.version}>Versión 1.0.0</Text>
+          <AppText style={styles.version}>Versión 1.0.0</AppText>
         </View>
 
         <View style={styles.footerSpace} />
