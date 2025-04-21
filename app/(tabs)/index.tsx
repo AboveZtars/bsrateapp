@@ -19,6 +19,7 @@ import {
   AppTextSemiBold,
   AppTextMedium,
 } from "@/components/FontProvider";
+import {LinearGradient} from "expo-linear-gradient";
 
 export default function ExchangeCalculator() {
   const [amount, setAmount] = useState("");
@@ -107,8 +108,8 @@ export default function ExchangeCalculator() {
       fontSize: 38,
       fontWeight: "bold",
       color: themeColors.text,
-      borderBottomWidth: 3,
-      borderBottomColor: themeColors.primary,
+      backgroundColor: themeColors.primary + "90",
+      borderRadius: 20,
       paddingVertical: 10,
       textAlign: "center",
     },
@@ -136,10 +137,8 @@ export default function ExchangeCalculator() {
       borderColor: "rgba(0,0,0,0.05)",
     },
     averageRate: {
-      marginTop: 16,
-      paddingTop: 24,
       borderTopWidth: 0,
-      backgroundColor: themeColors.primary + "30",
+      backgroundColor: themeColors.primary + "90",
       borderLeftWidth: 4,
       borderLeftColor: themeColors.primary,
       shadowColor: "#000",
@@ -170,7 +169,7 @@ export default function ExchangeCalculator() {
     convertedAmount: {
       fontSize: 18,
       fontWeight: "bold",
-      color: themeColors.textSecondary,
+      color: themeColors.text,
     },
     disclaimer: {
       marginTop: 24,
@@ -203,28 +202,6 @@ export default function ExchangeCalculator() {
           </View>
 
           <View style={styles.inputContainer}>
-            {/* Overlayed centered placeholder */}
-            {amount === "" && (
-              <AppTextBold
-                style={[
-                  styles.input,
-                  {
-                    position: "absolute",
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    bottom: 0,
-                    textAlign: "center",
-                    textAlignVertical: "center",
-                    color: themeColors.textSecondary,
-                    opacity: 0.6, // Increased contrast with lower opacity
-                    zIndex: 0,
-                  },
-                ]}
-              >
-                0
-              </AppTextBold>
-            )}
             <AppTextInput
               style={[styles.input, {zIndex: 1}]}
               keyboardType="decimal-pad"
@@ -243,7 +220,7 @@ export default function ExchangeCalculator() {
                 sanitized = sanitized.slice(0, 9);
                 setAmount(sanitized);
               }}
-              placeholder=""
+              placeholder="0"
               textAlign="center"
               textAlignVertical="center"
             />

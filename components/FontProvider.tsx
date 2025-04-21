@@ -31,7 +31,11 @@ export const AppText = (props: React.ComponentProps<typeof Text>) => {
 export const AppTextInput = (props: React.ComponentProps<typeof TextInput>) => {
   const {style, ...otherProps} = props;
   return (
-    <TextInput style={[{fontFamily: "Inter-Regular"}, style]} {...otherProps} />
+    <TextInput
+      placeholderTextColor="#9CA3AF"
+      style={[{fontFamily: "Inter-Regular"}, style]}
+      {...otherProps}
+    />
   );
 };
 

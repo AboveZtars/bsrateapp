@@ -1,20 +1,20 @@
-import React, { createContext, useContext } from 'react';
+import React, {createContext, useContext} from "react";
 
-type Theme = 'dark';
+type Theme = "dark";
 
 interface ThemeContextType {
   theme: Theme;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: 'dark',
+  theme: "dark",
 });
 
 export const useTheme = () => useContext(ThemeContext);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export function ThemeProvider({children}: {children: React.ReactNode}) {
   return (
-    <ThemeContext.Provider value={{ theme: 'dark' }}>
+    <ThemeContext.Provider value={{theme: "dark"}}>
       {children}
     </ThemeContext.Provider>
   );
