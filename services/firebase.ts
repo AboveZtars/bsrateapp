@@ -1,22 +1,30 @@
 import {initializeApp} from "firebase/app";
 import {getFirestore} from "firebase/firestore";
-import "../google-services.json";
+// import "../google-services.json";
 
-const googleServices = require("../google-services.json");
+// const googleServices = require("../google-services.json");
 // Your Firebase configuration
+console.log("FIREBASE CONFIG", {
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+});
 const firebaseConfig = {
-  apiKey: googleServices.client[0].api_key[0].current_key,
-  // authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: googleServices.project_info.project_id,
-  storageBucket: googleServices.project_info.storage_bucket,
-  // messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: googleServices.client[0].client_info.mobilesdk_app_id,
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
-const firestore = getFirestore("ratesve");
+const firestore = getFirestore(app);
 
 export {firestore};
