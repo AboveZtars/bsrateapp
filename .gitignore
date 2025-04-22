@@ -10,5 +10,5 @@ node_modules
 .env
 google-services.json
 my-upload-key.keystore
-/android/
-/ios/
+android
+ios
