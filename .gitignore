@@ -9,3 +9,6 @@ node_modules
 .expo
 .env
 google-services.json
+my-upload-key.keystore
+/android/
+/ios/
