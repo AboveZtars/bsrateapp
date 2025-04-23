@@ -9,6 +9,7 @@
     "lint": "expo lint",
     "android": "expo run:android",
     "android:prod": "expo run:android --variant release",
+    "eas:android:prod": "eas build --profile production --platform android",
     "ios": "expo run:ios"
   },
   "dependencies": {
