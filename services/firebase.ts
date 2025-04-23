@@ -1,9 +1,6 @@
-import {initializeApp} from "firebase/app";
-import {getFirestore} from "firebase/firestore";
-// import "../google-services.json";
+import {initializeApp, getApp} from "firebase/app";
+import {getFirestore, Firestore} from "firebase/firestore/lite";
 
-// const googleServices = require("../google-services.json");
-// Your Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -13,10 +10,22 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only once
+let firestoreInstance: Firestore;
 
-// Initialize Firestore
-const firestore = getFirestore("ratesve");
+function getFirestoreInstance(): Firestore {
+  try {
+    // Try to get existing app instance
+    const app = getApp();
+    if (!firestoreInstance) {
+      firestoreInstance = getFirestore(app, "ratesve");
+    }
+  } catch (e) {
+    // App not initialized, create a new one
+    const app = initializeApp(firebaseConfig);
+    firestoreInstance = getFirestore(app, "ratesve");
+  }
+  return firestoreInstance;
+}
 
-export {firestore};
+export const firestore = getFirestoreInstance();

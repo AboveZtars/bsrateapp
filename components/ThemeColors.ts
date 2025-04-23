@@ -23,15 +23,4 @@ export const colors = {
     success: "#10B981",
     error: "#EF4444",
   },
-  lightv2: {
-    background: "#D2E0FB",
-    surface: "#8EACCD",
-    primary: "#4F46E5",
-    secondary: "#818CF8",
-    text: "#FEF9D9",
-    textSecondary: "#DEE5D4",
-    border: "#E2E8F0",
-    success: "#10B981",
-    error: "#EF4444",
-  },
 };

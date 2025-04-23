@@ -20,7 +20,7 @@ import {
   AppTextBold,
   AppTextSemiBold,
 } from "@/components/FontProvider";
-import * as Clipboard from "expo-clipboard";
+import {setStringAsync} from "expo-clipboard";
 
 export default function ExchangeCalculator() {
   const [amount, setAmount] = useState("");
@@ -143,7 +143,7 @@ export default function ExchangeCalculator() {
 
   const copyToClipboard = async (value: string, label: string) => {
     try {
-      await Clipboard.setStringAsync(value);
+      await setStringAsync(value);
       setCopiedAmount(label);
 
       // Show platform-specific feedback

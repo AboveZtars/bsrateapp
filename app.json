@@ -1,15 +1,18 @@
 {
   "expo": {
-    "name": "bolt-expo-nativewind",
-    "slug": "bolt-expo-nativewind",
+    "name": "tasasve",
+    "slug": "tasasve",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "android": {
-      "package": "com.molina_aquino.tasasve"
+      "package": "com.molina_aquino.tasasve",
+      "enableProguardInReleaseBuilds": true,
+      "enableShrinkResourcesInReleaseBuilds": true
     },
     "web": {
       "bundler": "metro",
@@ -22,12 +25,18 @@
       [
         "expo-build-properties",
         {
-          "kotlinVersion": "1.9.25"
+          "kotlinVersion": "1.9.25",
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          }
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "tsconfigPaths": true
     },
     "ios": {
       "bundleIdentifier": "com.anonymous.boltexponativewind"
@@ -37,8 +46,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "a59d9854-e728-4892-b783-d26af3df6e4d"
+        "projectId": "c00dcb48-486c-4d21-8d31-28a045aa340b"
       }
-    }
+    },
+    "owner": "aboveztars"
   }
 }

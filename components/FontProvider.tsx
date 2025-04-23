@@ -1,10 +1,10 @@
 import React, {createContext, useContext, useEffect, useState} from "react";
-import {Text, TextInput, View} from "react-native";
-import * as Font from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
+import {Text, TextInput} from "react-native";
+import {loadAsync} from "expo-font";
+import {preventAutoHideAsync, hideAsync} from "expo-splash-screen";
 
 // Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
+preventAutoHideAsync();
 
 // Create a context to track font loading state
 const FontLoadingContext = createContext({fontsLoaded: false});
@@ -63,7 +63,7 @@ export const FontProvider = ({children}: {children: React.ReactNode}) => {
   useEffect(() => {
     async function loadFonts() {
       try {
-        await Font.loadAsync(fontAssets);
+        await loadAsync(fontAssets);
         setFontsLoaded(true);
       } catch (e) {
         console.warn("Failed to load fonts:", e);
@@ -78,7 +78,7 @@ export const FontProvider = ({children}: {children: React.ReactNode}) => {
   useEffect(() => {
     if (fontsLoaded) {
       // Hide splash screen once fonts are loaded
-      SplashScreen.hideAsync();
+      hideAsync();
     }
   }, [fontsLoaded]);
 
