@@ -6,6 +6,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useTheme} from "@/components/ThemeContext";
@@ -17,14 +19,17 @@ import {
   AppTextInput,
   AppTextBold,
   AppTextSemiBold,
-  AppTextMedium,
 } from "@/components/FontProvider";
-import {LinearGradient} from "expo-linear-gradient";
+import * as Clipboard from "expo-clipboard";
 
 export default function ExchangeCalculator() {
   const [amount, setAmount] = useState("");
   const [exchangeRates, setExchangeRates] = useState<ExchangeRate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inputMode, setInputMode] = useState<"USD_TO_BS" | "BS_TO_USD">(
+    "USD_TO_BS"
+  );
+  const [copiedAmount, setCopiedAmount] = useState<null | string>(null);
   const {theme} = useTheme();
   const themeColors = colors[theme];
 
@@ -59,21 +64,97 @@ export default function ExchangeCalculator() {
     loadRates();
   }, []);
 
+  // Reset copied amount indicator after 2 seconds
+  useEffect(() => {
+    if (copiedAmount) {
+      const timeout = setTimeout(() => {
+        setCopiedAmount(null);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [copiedAmount]);
+
   const averageRate = {
     name: "Promedio 📊",
-    rate: Number(
-      (
-        exchangeRates.reduce((acc, curr) => acc + curr.rate, 0) /
-        exchangeRates.length
-      ).toFixed(2)
-    ),
+    rate:
+      exchangeRates.length > 0
+        ? Number(
+            (
+              exchangeRates.reduce((acc, curr) => acc + curr.rate, 0) /
+              exchangeRates.length
+            ).toFixed(2)
+          )
+        : 0,
   };
+
+  // Extract BCV and Paralelo rates
+  const bcvRate = exchangeRates.find((rate) => rate.name.includes("BCV")) || {
+    name: "BCV",
+    rate: 0,
+  };
+
+  const paraleloRate = exchangeRates.find((rate) =>
+    rate.name.includes("Paralelo")
+  ) || {
+    name: "Paralelo",
+    rate: 0,
+  };
+
+  // Prepare table data
+  const tableData = [
+    {
+      label: "BCV 🏦",
+      ...bcvRate,
+      color: "#3498db",
+    },
+    {
+      label: "Promedio 📊",
+      ...averageRate,
+      color: themeColors.primary,
+    },
+    {
+      label: "Paralelo 💸",
+      ...paraleloRate,
+      color: "#2ecc71",
+    },
+  ];
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("es-VE", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(num);
+  };
+
+  const calculateConversion = (baseAmount: number, rate: number) => {
+    if (inputMode === "USD_TO_BS") {
+      return baseAmount * rate; // USD to Bs
+    } else {
+      return baseAmount / rate; // Bs to USD
+    }
+  };
+
+  const toggleInputMode = () => {
+    setInputMode((prevMode) =>
+      prevMode === "USD_TO_BS" ? "BS_TO_USD" : "USD_TO_BS"
+    );
+    setAmount(""); // Reset input when changing modes
+  };
+
+  const copyToClipboard = async (value: string, label: string) => {
+    try {
+      await Clipboard.setStringAsync(value);
+      setCopiedAmount(label);
+
+      // Show platform-specific feedback
+      if (Platform.OS === "android") {
+        ToastAndroid.show("Copiado al portapapeles", ToastAndroid.SHORT);
+      } else if (Platform.OS === "ios") {
+        // iOS doesn't have a built-in toast, we'll use the copied state for visual feedback
+      }
+    } catch (error) {
+      console.error("Error copying to clipboard:", error);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -90,7 +171,7 @@ export default function ExchangeCalculator() {
     },
     header: {
       alignItems: "center",
-      marginBottom: 40,
+      marginBottom: 20,
     },
     inputPrompt: {
       fontSize: 24,
@@ -99,32 +180,39 @@ export default function ExchangeCalculator() {
       textAlign: "center",
       letterSpacing: 0.5,
     },
-    inputContainer: {
-      backgroundColor: "transparent",
-      borderRadius: 20,
-      marginBottom: 48,
+    // Toggle styles
+    toggleContainer: {
+      flexDirection: "row",
+      backgroundColor: themeColors.surface,
+      borderRadius: 16,
+      marginBottom: 30,
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: "rgba(0,0,0,0.05)",
     },
-    input: {
-      fontSize: 38,
-      fontWeight: "bold",
-      color: themeColors.text,
-      backgroundColor: themeColors.primary + "90",
-      borderRadius: 20,
-      paddingVertical: 10,
-      textAlign: "center",
+    toggleButton: {
+      flex: 1,
+      paddingVertical: 12,
+      alignItems: "center",
+      justifyContent: "center",
     },
-    ratesTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: themeColors.text,
-      marginBottom: 24,
-      letterSpacing: 0.5,
+    toggleButtonActive: {
+      backgroundColor: themeColors.primary,
     },
-    rateCard: {
+    toggleText: {
+      fontSize: 16,
+      color: themeColors.textSecondary,
+    },
+    toggleTextActive: {
+      color: "#fff",
+      fontWeight: "600",
+    },
+    // Table styles
+    tableContainer: {
       backgroundColor: themeColors.surface,
       borderRadius: 20,
-      padding: 24,
-      marginBottom: 16,
+      overflow: "hidden",
+      marginBottom: 30,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
@@ -135,41 +223,61 @@ export default function ExchangeCalculator() {
       elevation: 6,
       borderWidth: 1,
       borderColor: "rgba(0,0,0,0.05)",
+      paddingVertical: 8,
     },
-    averageRate: {
-      borderTopWidth: 0,
-      backgroundColor: themeColors.primary + "90",
-      borderLeftWidth: 4,
-      borderLeftColor: themeColors.primary,
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 6,
-      },
-      shadowOpacity: 0.2,
-      shadowRadius: 15,
-      elevation: 8,
+    tableRow: {
+      flexDirection: "row",
+      padding: 16,
+      alignItems: "center",
+      marginHorizontal: 4,
+      marginVertical: 4,
+      borderRadius: 16,
+      backgroundColor: themeColors.surface,
     },
-    rateName: {
-      fontSize: 16,
+    leftColumn: {
+      flex: 1,
+    },
+    rightColumn: {
+      justifyContent: "center",
+      alignItems: "flex-end",
+      minWidth: 100,
+    },
+    tableLabel: {
+      fontSize: 17,
       fontWeight: "700",
       color: themeColors.text,
-      marginBottom: 12,
+      marginBottom: 2,
     },
-    rateValues: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    rateText: {
+    tableRate: {
       fontSize: 14,
-      color: themeColors.text,
-      opacity: 0.8,
+      color: themeColors.textSecondary,
     },
-    convertedAmount: {
-      fontSize: 18,
+    tableAmount: {
+      fontSize: 17,
       fontWeight: "bold",
       color: themeColors.text,
+    },
+    copyableAmount: {
+      padding: 8,
+      borderRadius: 8,
+    },
+    copiedHighlight: {
+      backgroundColor: "rgba(46, 204, 113, 0.2)",
+    },
+    // Input styles
+    inputContainer: {
+      backgroundColor: "transparent",
+      borderRadius: 20,
+      marginBottom: 30,
+    },
+    input: {
+      fontSize: 38,
+      fontWeight: "bold",
+      color: themeColors.text,
+      backgroundColor: themeColors.primary,
+      borderRadius: 20,
+      paddingVertical: 10,
+      textAlign: "center",
     },
     disclaimer: {
       marginTop: 24,
@@ -201,94 +309,127 @@ export default function ExchangeCalculator() {
             </AppTextSemiBold>
           </View>
 
-          <View style={styles.inputContainer}>
-            <AppTextInput
-              style={[styles.input, {zIndex: 1}]}
-              keyboardType="decimal-pad"
-              value={amount}
-              onChangeText={(text) => {
-                // Replace commas with periods for decimal input
-                let sanitized = text.replace(/,/g, ".");
-                // Remove any non-numeric and non-decimal characters
-                sanitized = sanitized.replace(/[^0-9.,]/g, "");
-                // Ensure only one decimal point exists
-                const parts = sanitized.split(".");
-                if (parts.length > 2) {
-                  sanitized = parts[0] + "." + parts.slice(1).join("");
-                }
-                // Limit to 7 characters
-                sanitized = sanitized.slice(0, 9);
-                setAmount(sanitized);
-              }}
-              placeholder="0"
-              textAlign="center"
-              textAlignVertical="center"
-            />
-          </View>
-
-          <AppTextSemiBold style={styles.ratesTitle}>
-            Tasas de Cambio 💱
-          </AppTextSemiBold>
-
           {loading ? (
             <ActivityIndicator size="large" color={themeColors.primary} />
           ) : (
             <>
-              {exchangeRates.map((rate, index) => {
-                // Determine card styling based on rate type
-                const getBorderColor = () => {
-                  if (rate.name.includes("BCV")) return "#3498db";
-                  if (rate.name.includes("Paralelo")) return "#2ecc71";
-                  return "rgba(0,0,0,0.05)";
-                };
-
-                return (
-                  <View
-                    key={index}
+              {/* Mode Toggle */}
+              <View style={styles.toggleContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    inputMode === "USD_TO_BS" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => toggleInputMode()}
+                  activeOpacity={0.8}
+                >
+                  <AppText
                     style={[
-                      styles.rateCard,
-                      {borderLeftWidth: 4, borderLeftColor: getBorderColor()},
+                      styles.toggleText,
+                      inputMode === "USD_TO_BS" && styles.toggleTextActive,
                     ]}
                   >
-                    <AppTextMedium style={styles.rateName}>
-                      {rate.name}
-                    </AppTextMedium>
-                    <View style={styles.rateValues}>
-                      <AppText style={styles.rateText}>
-                        1$ = Bs. {formatNumber(rate.rate)}
-                      </AppText>
-                      <AppTextBold style={styles.convertedAmount}>
-                        {amount
-                          ? `${formatNumber(
-                              parseFloat(amount) * rate.rate
-                            )} Bs.`
-                          : "0,00 Bs."}
-                      </AppTextBold>
-                    </View>
-                  </View>
-                );
-              })}
-
-              <View style={[styles.rateCard, styles.averageRate]}>
-                <AppTextMedium style={styles.rateName}>
-                  {averageRate.name}
-                </AppTextMedium>
-                <View style={styles.rateValues}>
-                  <AppText style={styles.rateText}>
-                    1$ = Bs. {formatNumber(averageRate.rate)}
+                    USD → Bs
                   </AppText>
-                  <AppTextBold style={styles.convertedAmount}>
-                    {amount
-                      ? `${formatNumber(
-                          parseFloat(amount) * averageRate.rate
-                        )} Bs.`
-                      : "0,00 Bs."}
-                  </AppTextBold>
-                </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    inputMode === "BS_TO_USD" && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => toggleInputMode()}
+                  activeOpacity={0.8}
+                >
+                  <AppText
+                    style={[
+                      styles.toggleText,
+                      inputMode === "BS_TO_USD" && styles.toggleTextActive,
+                    ]}
+                  >
+                    Bs → USD
+                  </AppText>
+                </TouchableOpacity>
+              </View>
+
+              {/* Table of rates */}
+              <View style={styles.tableContainer}>
+                {tableData.map((row, index) => {
+                  // Calculate the formatted conversion amount
+                  const convertedAmount =
+                    amount && row.rate
+                      ? inputMode === "USD_TO_BS"
+                        ? `${formatNumber(parseFloat(amount) * row.rate)} Bs.`
+                        : `${formatNumber(parseFloat(amount) / row.rate)} $`
+                      : inputMode === "USD_TO_BS"
+                      ? "0,00 Bs."
+                      : "0,00 $";
+
+                  return (
+                    <View key={index} style={styles.tableRow}>
+                      <View style={styles.leftColumn}>
+                        <AppTextSemiBold style={styles.tableLabel}>
+                          {row.label}
+                        </AppTextSemiBold>
+                        <AppText style={styles.tableRate}>
+                          1$ = Bs. {formatNumber(row.rate)}
+                        </AppText>
+                      </View>
+                      <View style={styles.rightColumn}>
+                        <TouchableOpacity
+                          style={[
+                            styles.copyableAmount,
+                            copiedAmount === row.label &&
+                              styles.copiedHighlight,
+                          ]}
+                          onPress={() =>
+                            copyToClipboard(convertedAmount, row.label)
+                          }
+                          activeOpacity={0.7}
+                        >
+                          <AppTextBold style={styles.tableAmount}>
+                            {convertedAmount}
+                          </AppTextBold>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+
+              {/* Input for amount */}
+              <View style={styles.inputContainer}>
+                <AppTextInput
+                  style={styles.input}
+                  keyboardType="decimal-pad"
+                  value={amount}
+                  onChangeText={(text) => {
+                    // Replace commas with periods for decimal input
+                    let sanitized = text.replace(/,/g, ".");
+                    // Remove any non-numeric and non-decimal characters
+                    sanitized = sanitized.replace(/[^0-9.,]/g, "");
+                    // Ensure only one decimal point exists
+                    const parts = sanitized.split(".");
+                    if (parts.length > 2) {
+                      sanitized = parts[0] + "." + parts.slice(1).join("");
+                    }
+                    // Limit to 9 characters
+                    sanitized = sanitized.slice(0, 9);
+                    setAmount(sanitized);
+                  }}
+                  placeholder={
+                    inputMode === "USD_TO_BS" ? "Monto $" : "Monto Bs."
+                  }
+                  textAlign="center"
+                  textAlignVertical="center"
+                />
               </View>
 
               <AppText style={styles.disclaimer}>
                 * Las tasas son referenciales y pueden variar durante el día ⏰
+              </AppText>
+
+              <AppText style={styles.disclaimer}>
+                * Toca un monto convertido para copiarlo al portapapeles 📋
               </AppText>
 
               <View style={styles.footerSpace} />
