@@ -9,7 +9,6 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "android": {
-      "googleServicesFile": "./google-services.json",
       "package": "com.molina_aquino.tasasve"
     },
     "web": {

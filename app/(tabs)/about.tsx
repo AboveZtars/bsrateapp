@@ -103,10 +103,9 @@ export default function About() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <AppTextBold style={styles.title}>Acerca de BSRate</AppTextBold>
+          <AppTextBold style={styles.title}>Acerca de tasasve</AppTextBold>
           <AppText style={styles.subtitle}>
-            Una aplicación para consultar tasas de cambio de bolívar a dólar en
-            Venezuela.
+            Una aplicación para consultar tasas de cambio en Venezuela.
           </AppText>
         </View>
 
@@ -116,10 +115,11 @@ export default function About() {
           </AppTextSemiBold>
           <View style={styles.card}>
             <AppText style={styles.cardText}>
-              BSRate recopila información de diferentes fuentes para brindarte
-              las tasas de cambio más actualizadas. Puedes ingresar un monto en
-              dólares y obtener su equivalente en bolívares según diferentes
-              proveedores.
+              tasasve utiliza información de distintos mercados y del Banco
+              Central de Venezuela para mostrarte las tasas de cambio más
+              actualizadas. Puedes ingresar un monto en dólares y obtener su
+              equivalente en bolívares y viceversa según las fuentes
+              disponibles.
             </AppText>
           </View>
         </View>
@@ -150,7 +150,7 @@ export default function About() {
             <TouchableOpacity
               onPress={() => Linking.openURL("mailto:contact@bsrate.app")}
             >
-              <AppText style={styles.link}>contact@bsrate.app</AppText>
+              <AppText style={styles.link}>rafael@molina-aquino.com</AppText>
             </TouchableOpacity>
           </View>
         </View>

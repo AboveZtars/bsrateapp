@@ -185,7 +185,7 @@ export default function ExchangeCalculator() {
       flexDirection: "row",
       backgroundColor: themeColors.surface,
       borderRadius: 16,
-      marginBottom: 30,
+      marginBottom: 10,
       overflow: "hidden",
       borderWidth: 1,
       borderColor: "rgba(0,0,0,0.05)",
@@ -212,7 +212,7 @@ export default function ExchangeCalculator() {
       backgroundColor: themeColors.surface,
       borderRadius: 20,
       overflow: "hidden",
-      marginBottom: 30,
+      marginBottom: 15,
       shadowColor: "#000",
       shadowOffset: {
         width: 0,
@@ -267,17 +267,17 @@ export default function ExchangeCalculator() {
     // Input styles
     inputContainer: {
       backgroundColor: "transparent",
-      borderRadius: 20,
-      marginBottom: 30,
+      marginBottom: 20,
     },
     input: {
       fontSize: 38,
       fontWeight: "bold",
       color: themeColors.text,
-      backgroundColor: themeColors.primary,
-      borderRadius: 20,
+      backgroundColor: "transparent",
       paddingVertical: 10,
       textAlign: "center",
+      borderBottomWidth: 2,
+      borderBottomColor: themeColors.primary,
     },
     disclaimer: {
       marginTop: 24,
@@ -303,11 +303,11 @@ export default function ExchangeCalculator() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.header}>
+          {/* <View style={styles.header}>
             <AppTextSemiBold style={styles.inputPrompt}>
               Calculadora de Tasas 💵
             </AppTextSemiBold>
-          </View>
+          </View> */}
 
           {loading ? (
             <ActivityIndicator size="large" color={themeColors.primary} />
@@ -400,7 +400,11 @@ export default function ExchangeCalculator() {
               <View style={styles.inputContainer}>
                 <AppTextInput
                   style={styles.input}
-                  keyboardType="decimal-pad"
+                  keyboardType="numeric"
+                  autoComplete="additional-name"
+                  autoCorrect={false}
+                  spellCheck={false}
+                  importantForAutofill="noExcludeDescendants"
                   value={amount}
                   onChangeText={(text) => {
                     // Replace commas with periods for decimal input
