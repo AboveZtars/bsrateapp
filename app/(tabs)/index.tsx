@@ -164,6 +164,7 @@ export default function ExchangeCalculator() {
     },
     container: {
       flex: 1,
+      backgroundColor: themeColors.background,
     },
     scrollContent: {
       padding: 24,
@@ -297,7 +298,7 @@ export default function ExchangeCalculator() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.keyboardView}
     >
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
