@@ -148,9 +148,9 @@ export default function About() {
               con nosotros:
             </AppText>
             <TouchableOpacity
-              onPress={() => Linking.openURL("mailto:contact@bsrate.app")}
+              onPress={() => Linking.openURL("mailto:tasasvesoporte@gmail.com")}
             >
-              <AppText style={styles.link}>rafael@molina-aquino.com</AppText>
+              <AppText style={styles.link}>tasasvesoporte@gmail.com</AppText>
             </TouchableOpacity>
           </View>
         </View>
