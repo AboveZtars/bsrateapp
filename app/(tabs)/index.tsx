@@ -126,14 +126,6 @@ export default function ExchangeCalculator() {
     }).format(num);
   };
 
-  const calculateConversion = (baseAmount: number, rate: number) => {
-    if (inputMode === "USD_TO_BS") {
-      return baseAmount * rate; // USD to Bs
-    } else {
-      return baseAmount / rate; // Bs to USD
-    }
-  };
-
   const toggleInputMode = () => {
     setInputMode((prevMode) =>
       prevMode === "USD_TO_BS" ? "BS_TO_USD" : "USD_TO_BS"
@@ -167,6 +159,8 @@ export default function ExchangeCalculator() {
       backgroundColor: themeColors.background,
     },
     scrollContent: {
+      flexGrow: 1,
+      backgroundColor: themeColors.background,
       padding: 24,
       paddingTop: 36,
     },
@@ -294,22 +288,16 @@ export default function ExchangeCalculator() {
   });
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.keyboardView}
-    >
-      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.keyboardView}
+      >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* <View style={styles.header}>
-            <AppTextSemiBold style={styles.inputPrompt}>
-              Calculadora de Tasas 💵
-            </AppTextSemiBold>
-          </View> */}
-
           {loading ? (
             <ActivityIndicator size="large" color={themeColors.primary} />
           ) : (
@@ -400,6 +388,7 @@ export default function ExchangeCalculator() {
               {/* Input for amount */}
               <View style={styles.inputContainer}>
                 <AppTextInput
+                  key={inputMode}
                   style={styles.input}
                   keyboardType="numeric"
                   autoComplete="additional-name"
@@ -441,7 +430,7 @@ export default function ExchangeCalculator() {
             </>
           )}
         </ScrollView>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

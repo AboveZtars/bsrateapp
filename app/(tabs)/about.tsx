@@ -24,8 +24,11 @@ export default function About() {
     container: {
       flex: 1,
       backgroundColor: themeColors.background,
+      paddingBottom: -25,
     },
     scrollContent: {
+      flexGrow: 1,
+      backgroundColor: themeColors.background,
       padding: 24,
       paddingTop: 36,
     },
@@ -159,7 +162,7 @@ export default function About() {
           <AppText style={styles.version}>Versión 1.0.0</AppText>
         </View>
 
-        <View style={styles.footerSpace} />
+        {/* <View style={styles.footerSpace} /> */}
       </ScrollView>
     </SafeAreaView>
   );
