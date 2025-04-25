@@ -64,7 +64,8 @@
         "android.permission.READ_MEDIA_AUDIO",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.NEARBY_WIFI_DEVICES"
-      ]
+      ],
+      "tablet": true
     },
     "web": {
       "bundler": "metro",
