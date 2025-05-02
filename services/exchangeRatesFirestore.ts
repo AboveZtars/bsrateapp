@@ -58,7 +58,8 @@ export const fetchExchangeRatesFromFirestore = async (): Promise<
 };
 
 // Default rates in case of error or empty collection
-const getDefaultRates = (): ExchangeRate[] => {
+// Exported so it can be used by other modules
+export const getDefaultRates = (): ExchangeRate[] => {
   return [
     {name: "BCV (Oficial) 🏦", rate: 35.88},
     {name: "Paralelo 💱", rate: 37.5},

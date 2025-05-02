@@ -2,10 +2,17 @@ import {Tabs} from "expo-router";
 import {Ionicons} from "@expo/vector-icons";
 import {useTheme} from "@/components/ThemeContext";
 import {colors} from "@/components/ThemeColors";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const {theme} = useTheme();
   const themeColors = colors[theme];
+  const insets = useSafeAreaInsets();
+
+  // Define base values for the tab bar
+  const baseTabBarHeight = 60;
+  const basePaddingBottom = 8;
+  const basePaddingTop = 8;
 
   return (
     <Tabs
@@ -15,9 +22,10 @@ export default function TabLayout() {
           backgroundColor: themeColors.surface,
           borderTopColor: themeColors.border,
           borderTopWidth: 0,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          // Adjust height and padding to account for the system navigation bar
+          height: baseTabBarHeight + insets.bottom,
+          paddingBottom: basePaddingBottom + insets.bottom,
+          paddingTop: basePaddingTop,
         },
         tabBarActiveTintColor: themeColors.text,
         tabBarInactiveTintColor: themeColors.textSecondary,

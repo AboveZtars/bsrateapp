@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {
   View,
   StyleSheet,
@@ -12,8 +12,8 @@ import {
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useTheme} from "@/components/ThemeContext";
 import {colors} from "@/components/ThemeColors";
-import {fetchExchangeRates, ExchangeRate} from "@/services/exchangeRates";
-import {fetchExchangeRatesFromFirestore} from "@/services/exchangeRatesFirestore";
+import {ExchangeRate} from "@/services/exchangeRates";
+import {getRatesUsingCache} from "@/services/cachedExchangeRates";
 import {
   AppText,
   AppTextInput,
@@ -23,7 +23,9 @@ import {
 import {setStringAsync} from "expo-clipboard";
 
 export default function ExchangeCalculator() {
-  const [amount, setAmount] = useState("");
+  const [debouncedAmount, setDebouncedAmount] = useState("");
+  const [rawInputValue, setRawInputValue] = useState("");
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [exchangeRates, setExchangeRates] = useState<ExchangeRate[]>([]);
   const [loading, setLoading] = useState(true);
   const [inputMode, setInputMode] = useState<"USD_TO_BS" | "BS_TO_USD">(
@@ -36,26 +38,11 @@ export default function ExchangeCalculator() {
   useEffect(() => {
     const loadRates = async () => {
       try {
-        // Attempt to fetch from Firestore first
-        const firestoreRates = await fetchExchangeRatesFromFirestore();
-
-        // If Firestore has data, use it
-        // Otherwise, fallback to the API
-        if (firestoreRates.length > 0) {
-          setExchangeRates(firestoreRates);
-        } else {
-          const apiRates = await fetchExchangeRates();
-          setExchangeRates(apiRates);
-        }
+        // Use the new cache-aware function to get exchange rates
+        const rates = await getRatesUsingCache();
+        setExchangeRates(rates);
       } catch (error) {
         console.error("Error loading rates:", error);
-        // Fallback to API as a last resort
-        try {
-          const rates = await fetchExchangeRates();
-          setExchangeRates(rates);
-        } catch (fallbackError) {
-          console.error("Fallback error:", fallbackError);
-        }
       } finally {
         setLoading(false);
       }
@@ -73,6 +60,15 @@ export default function ExchangeCalculator() {
       return () => clearTimeout(timeout);
     }
   }, [copiedAmount]);
+
+  // Cleanup for debounce timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const averageRate = {
     name: "Promedio 📊",
@@ -130,7 +126,14 @@ export default function ExchangeCalculator() {
     setInputMode((prevMode) =>
       prevMode === "USD_TO_BS" ? "BS_TO_USD" : "USD_TO_BS"
     );
-    setAmount(""); // Reset input when changing modes
+    // Reset both input states when changing modes
+    setRawInputValue("");
+    setDebouncedAmount("");
+    // Clear any pending debounce
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+      debounceTimeoutRef.current = null;
+    }
   };
 
   const copyToClipboard = async (value: string, label: string) => {
@@ -147,6 +150,36 @@ export default function ExchangeCalculator() {
     } catch (error) {
       console.error("Error copying to clipboard:", error);
     }
+  };
+
+  // Handler for text input changes with debouncing
+  const handleInputChange = (text: string) => {
+    // Update raw input immediately for responsive UI
+    setRawInputValue(text);
+
+    // Clear any existing debounce timer
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    // Set a new timer to process the input after a delay
+    debounceTimeoutRef.current = setTimeout(() => {
+      // Sanitize the input
+      let sanitized = text.replace(/,/g, ".");
+      sanitized = sanitized.replace(/[^0-9.,]/g, "");
+
+      // Ensure only one decimal point exists
+      const parts = sanitized.split(".");
+      if (parts.length > 2) {
+        sanitized = parts[0] + "." + parts.slice(1).join("");
+      }
+
+      // Limit to 9 characters
+      sanitized = sanitized.slice(0, 9);
+
+      // Update the debounced amount for calculations
+      setDebouncedAmount(sanitized);
+    }, 450);
   };
 
   const styles = StyleSheet.create({
@@ -245,7 +278,7 @@ export default function ExchangeCalculator() {
     },
     tableRate: {
       fontSize: 14,
-      color: themeColors.textSecondary,
+      color: themeColors.text,
     },
     tableAmount: {
       fontSize: 17,
@@ -343,12 +376,16 @@ export default function ExchangeCalculator() {
               {/* Table of rates */}
               <View style={styles.tableContainer}>
                 {tableData.map((row, index) => {
-                  // Calculate the formatted conversion amount
+                  // Calculate the formatted conversion amount using debouncedAmount
                   const convertedAmount =
-                    amount && row.rate
+                    debouncedAmount && row.rate
                       ? inputMode === "USD_TO_BS"
-                        ? `${formatNumber(parseFloat(amount) * row.rate)} Bs.`
-                        : `${formatNumber(parseFloat(amount) / row.rate)} $`
+                        ? `${formatNumber(
+                            parseFloat(debouncedAmount) * row.rate
+                          )} Bs.`
+                        : `${formatNumber(
+                            parseFloat(debouncedAmount) / row.rate
+                          )} $`
                       : inputMode === "USD_TO_BS"
                       ? "0,00 Bs."
                       : "0,00 $";
@@ -395,21 +432,8 @@ export default function ExchangeCalculator() {
                   autoCorrect={false}
                   spellCheck={false}
                   importantForAutofill="noExcludeDescendants"
-                  value={amount}
-                  onChangeText={(text) => {
-                    // Replace commas with periods for decimal input
-                    let sanitized = text.replace(/,/g, ".");
-                    // Remove any non-numeric and non-decimal characters
-                    sanitized = sanitized.replace(/[^0-9.,]/g, "");
-                    // Ensure only one decimal point exists
-                    const parts = sanitized.split(".");
-                    if (parts.length > 2) {
-                      sanitized = parts[0] + "." + parts.slice(1).join("");
-                    }
-                    // Limit to 9 characters
-                    sanitized = sanitized.slice(0, 9);
-                    setAmount(sanitized);
-                  }}
+                  value={rawInputValue}
+                  onChangeText={handleInputChange}
                   placeholder={
                     inputMode === "USD_TO_BS" ? "Monto $" : "Monto Bs."
                   }

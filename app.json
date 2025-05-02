@@ -85,14 +85,18 @@
             "buildToolsVersion": "35.0.0"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
     },
     "ios": {
-      "bundleIdentifier": "com.anonymous.boltexponativewind"
+      "bundleIdentifier": "com.anonymous.boltexponativewind",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "extra": {
       "router": {
